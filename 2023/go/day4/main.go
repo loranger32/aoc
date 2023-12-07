@@ -38,8 +38,22 @@ func (c *card) value() int {
 	return score
 }
 
+func (c *card) points() int {
+	score := 0
+
+	for _, wn := range c.winningNumbers {
+		for _, an := range c.actualNumbers {
+			if wn == an {
+				score += 1
+			}
+		}
+	}
+
+	return score
+}
+
 func main() {
-	lines := getLines(input)
+	lines := getLines(testInput)
 	//part1(lines)
 	part2(lines)
 }
@@ -58,7 +72,27 @@ func part1(lines []string) {
 
 func part2(lines []string) {
 	cards := extractCards(lines)
+	totalCards := len(cards)
 
+	for _, c := range cards {
+		totalCards += computeWinningCards(c, cards)
+	}
+
+	fmt.Printf("The total of cards is: %d\n", totalCards)
+}
+
+func computeWinningCards(c card, cards []card) int {
+	points := c.points()
+
+	if points == 0 {
+		return points
+	}
+
+	for _, copyOfCard := range cards[c.id : c.id+points] {
+		points += computeWinningCards(copyOfCard, cards)
+	}
+
+	return points
 }
 
 func extractCards(lines []string) []card {
