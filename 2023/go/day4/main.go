@@ -53,7 +53,7 @@ func (c *card) points() int {
 }
 
 func main() {
-	lines := getLines(testInput)
+	lines := getLines(input)
 	//part1(lines)
 	part2(lines)
 }
