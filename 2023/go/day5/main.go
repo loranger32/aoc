@@ -73,12 +73,56 @@ func part2(data string) {
 	almanac := generateAlmanac(splitted[1:])
 	minLocation := 10_000_000_000
 
-	for _, sr := range seedRanges {
-		checkMinLocation(sr, almanac, &minLocation)
-	}
-
-	fmt.Printf("The lowest location is: %d\n", minLocation)
 }
+
+// part 2 - brute force with goroutines - Needs better channel handling (closing or using unbuffered channel)
+//func part2(data string) {
+//	splitted := strings.Split(data, "\n\n")
+//	seedRanges := getSeedRanges(splitted[0])
+//	almanac := generateAlmanac(splitted[1:])
+//
+//	wg := new(sync.WaitGroup)
+//	wg.Add(len(seedRanges))
+//	results := make(chan int, len(seedRanges))
+//
+//	for _, sr := range seedRanges {
+//		srCopy := sr
+//		go func(ch chan<- int) {
+//			defer wg.Done()
+//			location := 10_000_000_000
+//			checkMinLocation(srCopy, almanac, &location)
+//			fmt.Println("Chan minLocation: ", location)
+//			ch <- location
+//		}(results)
+//	}
+//
+//	wg.Wait()
+//
+//	var minLocations []int
+//	for r := range results {
+//		minLocations = append(minLocations, r)
+//		if len(results) == 0 {
+//			break
+//		}
+//	}
+//
+//	minLocation := slices.Min(minLocations)
+//	fmt.Printf("The lowest location is: %d\n", minLocation)
+//}
+
+// Part 2 - Brute force without threads
+//func part2(data string) {
+//	splitted := strings.Split(data, "\n\n")
+//	seedRanges := getSeedRanges(splitted[0])
+//	almanac := generateAlmanac(splitted[1:])
+//	minLocation := 10_000_000_000
+//
+//	for _, sr := range seedRanges {
+//		checkMinLocation(sr, almanac, &minLocation)
+//	}
+//
+//	fmt.Printf("The lowest location is: %d\n", minLocation)
+//}
 
 func checkMinLocation(sr seedRange, almanac []table, minLocation *int) {
 	end := sr.end
