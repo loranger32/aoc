@@ -46,6 +46,10 @@ type seedRange struct {
 	start, end int
 }
 
+func (sr *seedRange) inRange(s int) bool {
+	return s >= sr.start && s <= sr.end
+}
+
 func main() {
 	rawData := getInput(input)
 	//part1(rawData)
@@ -67,15 +71,19 @@ func part1(data string) {
 	fmt.Printf("The lowest location is: %d\n", lowest)
 }
 
+// part 2 - starting from locations
 func part2(data string) {
 	splitted := strings.Split(data, "\n\n")
 	seedRanges := getSeedRanges(splitted[0])
 	almanac := generateAlmanac(splitted[1:])
-	minLocation := 10_000_000_000
+	revAlmanac := reverseAlmanac(almanac)
 
+	minLocation := findMinLocationFromLocations(seedRanges, revAlmanac)
+
+	fmt.Println("The lowest location is: ", minLocation)
 }
 
-// part 2 - brute force with goroutines - Needs better channel handling (closing or using unbuffered channel)
+// part 2 - brute force with goroutines
 //func part2(data string) {
 //	splitted := strings.Split(data, "\n\n")
 //	seedRanges := getSeedRanges(splitted[0])
@@ -159,6 +167,23 @@ func generateAlmanac(data []string) []table {
 	return almanac
 }
 
+func reverseAlmanac(almanac []table) []table {
+	var revAlmanac []table
+
+	for _, t := range almanac {
+		var revTable table
+		for _, tp := range t {
+			revTable = append(revTable, tablePart{src: tp.dst, dst: tp.src, rg: tp.rg})
+		}
+		slices.SortFunc(revTable, func(a, b tablePart) int {
+			return cmp.Compare(a.src, b.src)
+		})
+
+		revAlmanac = append([]table{revTable}, revAlmanac...)
+	}
+	return revAlmanac
+}
+
 func generateTable(tablesData string) table {
 	var t table
 
@@ -212,4 +237,29 @@ func getSeeds(l string) []int {
 	}
 
 	return seeds
+}
+
+func findMinLocationFromLocations(seedRanges []seedRange, revAlmanac []table) int {
+	maxLocation := 10_000_000_000
+	var minLocation int
+
+	for l := 0; l < maxLocation; l++ {
+		potentialSeed := findLocation(l, revAlmanac)
+		if seedAvailable(potentialSeed, seedRanges) {
+			minLocation = l
+			break
+		}
+	}
+
+	return minLocation
+}
+
+func seedAvailable(seed int, seedRanges []seedRange) bool {
+	for _, sr := range seedRanges {
+		if sr.inRange(seed) {
+			return true
+		}
+	}
+
+	return false
 }
